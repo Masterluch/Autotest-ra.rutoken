@@ -8,32 +8,28 @@ import time
 
 
 class KeyPair():
-    def __init__(self, driver, id, algorithm):
+    def __init__(self, browser, id, algorithm):
         self.is_created = False
-        wait = WebDriverWait(driver, 10)
-
-        # Нажимаем кнопку для создания нового ключа
-        wait.until(ec.visibility_of_element_located((By.CSS_SELECTOR, ".add__button"))).click()
-
+        self.id = id
+        
+        browser.get_element_by(By.XPATH, "//span[contains(text(), '{}')]".format("Создать ключ")).click() # div/button
+   
         # Заполняем поле "Идентификатор"
-        wait.until(ec.visibility_of_element_located((By.CSS_SELECTOR, "#id"))).send_keys(id)
+        browser.get_element_by(By.CSS_SELECTOR, "#id").send_keys(self.id)
 
         # Выбираем алгоритм
-        element_alg = wait.until(ec.visibility_of_element_located((By.XPATH, "//*[contains(text(), '{}')]".format(algorithm)))).click()
+        browser.get_element_by(By.XPATH, "//*[contains(text(), '{}')]".format(algorithm)).click()
 
-        # Нажимаем кнопку "Сгенерировать ключ"
-        wait.until(ec.visibility_of_element_located((By.CSS_SELECTOR, ".right__bg"))).click()
+        # Нажимаем кнопку "Сгенерировать ключи"
+        browser.get_element_by(By.CSS_SELECTOR, ".right__bg").click()
 
         # Проверим создание ключа
         try:
-            element_text = wait.until(ec.visibility_of_element_located((By.CSS_SELECTOR, ".bg__title")))
+            element_text = browser.get_element_by(By.CSS_SELECTOR, ".bg__title")
             if (element_text.text == "Ключи созданы!"):
                 self.is_created = True
         except TimeoutException:
             pass
 
         # Открываем домашнюю страницу
-        wait.until(ec.visibility_of_element_located((By.CSS_SELECTOR, ".keys__back"))).click()
-        time.sleep(5)
-
-        
+        browser.get_element_by(By.CSS_SELECTOR, ".keys__back").click()
