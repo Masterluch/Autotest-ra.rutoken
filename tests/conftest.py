@@ -11,8 +11,15 @@ sys.path.append("..\\include")
 from settings import *
 from Browser import Browser
 
+from loguru import logger
+logger.remove()
+logger.add("../logs/tests.log", format="{time} | {level} | {message}")
+
 @pytest.fixture(scope="session", params=SUPPORTED_BROWSERS)
 def get_browser(request):
     browser = Browser(request.param)
+
+    logger.info(f"Начало тестирования в браузере {request.param}")
+
     yield browser
     browser.driver.quit()

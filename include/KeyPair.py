@@ -6,30 +6,55 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.common.exceptions import TimeoutException
 import time
 
+from loguru import logger
+logger.remove()
+logger.add("../logs/tests.log", format="{level} | {module} | {function} | {message}")
 
 class KeyPair():
-    def __init__(self, browser, id, algorithm):
+    def __init__(self, browser, id: str, algorithm: str):
         self.is_created = False
         self.id = id
-        
-        browser.get_element_by(By.XPATH, "//span[contains(text(), '{}')]".format("Создать ключ")).click() # div/button
+        logger.debug(f"Начало создания ключа {self.id}")
+
+        browser.click_on_element_by(By.XPATH, "//span[contains(text(), '{}')]".format("Создать ключ"))
+        logger.debug("Нажата кнопка 'Создать ключ'")
    
         # Заполняем поле "Идентификатор"
         browser.get_element_by(By.CSS_SELECTOR, "#id").send_keys(self.id)
+        logger.debug("Заполнен идентификатор")
 
         # Выбираем алгоритм
-        browser.get_element_by(By.XPATH, "//*[contains(text(), '{}')]".format(algorithm)).click()
+        browser.click_on_element_by(By.XPATH, f"//*[contains(text(), '{algorithm}')]")
+        logger.debug(f"Выбран алгоритм {algorithm}")
 
         # Нажимаем кнопку "Сгенерировать ключи"
-        browser.get_element_by(By.CSS_SELECTOR, ".right__bg").click()
+        browser.click_on_element_by(By.CSS_SELECTOR, ".right__bg")
+        logger.debug("Нажата кнопка 'Сгенерировать ключи'")
 
         # Проверим создание ключа
         try:
-            element_text = browser.get_element_by(By.CSS_SELECTOR, ".bg__title")
+            element_text = browser.get_element_by(By.XPATH, "//*[contains(text(), 'Ключи созданы!')]")
+            # element_text = browser.get_element_by(By.CSS_SELECTOR, ".bg__title")
+            logger.debug("Найдена надпись 'Ключи созданы!'")
             if (element_text.text == "Ключи созданы!"):
+                logger.debug(f"Ключ {self.id} успешно сгенерирован")
                 self.is_created = True
         except TimeoutException:
+            logger.error(f"Ключ {self.id} не сгенерирован")
             pass
 
         # Открываем домашнюю страницу
-        browser.get_element_by(By.CSS_SELECTOR, ".keys__back").click()
+        browser.click_on_element_by(By.CSS_SELECTOR, ".keys__back")
+        logger.debug("Нажата кнопка '<- К сертификатам и ключам'")
+
+    def delete(self, browser):
+        logger.debug(f"Начало удаления ключа {self.id}")
+
+        # Нажимаем кнопку "Прочитать хранилища устройств заново"
+        browser.click_on_element_by(By.CSS_SELECTOR, ".img__reload")
+        # Нажимаем кнопку корзины
+        browser.click_on_element_by(By.XPATH, f"//*[contains(text(), '{self.id}')]/../../../../div[1]/div[3]/span[@class = 'img__trash']")
+        logger.debug("Нажата кнопка 'Корзина'")
+        # Нажимаем на кнопку "Удалить"
+        browser.click_on_element_by(By.XPATH, f"//*[contains(text(), 'Удалить')]")
+        logger.debug("Нажата кнопка 'Удалить'")

@@ -10,10 +10,7 @@ from Browser import Browser
 
 def test_authorization(get_browser):
     browser = get_browser
-    browser.open_page(AUTHORIZATION_PAGE_URL)
-
-    browser.get_element_by(By.CSS_SELECTOR, "#pin").send_keys("12345678")
-    browser.get_element_by(By.CSS_SELECTOR, ".right__bg").click()
+    browser.authorization()
 
     element_button_create_new_key = browser.get_element_by(By.CSS_SELECTOR, ".add__button")
     assert(element_button_create_new_key)

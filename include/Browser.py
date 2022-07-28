@@ -11,8 +11,14 @@ from settings import *
 
 from webdriver_manager.firefox import GeckoDriverManager
 
+import time
+
+from loguru import logger
+logger.remove()
+logger.add("../logs/tests.log", format="{level} | {module} | {function} | {message}")
+
 class Browser:
-    WAITING_TIME = 20
+    WAITING_TIME = 30
 
     def __init__(self, browser_name):
         # Настройка драйвера
@@ -20,6 +26,8 @@ class Browser:
             case "chrome":
                 options = chrome_options()
                 options.add_argument("--load-extension={}".format(CHROME_RARUTOKEN_PLUGIN_PATH))
+                # Для устранения ошибки [500:5256:0727/134228.966:ERROR:device_event_log_impl.cc(214)] при запуске
+                options.add_experimental_option("excludeSwitches", ["enable-logging"])
                 self.driver = webdriver.Chrome(
                     service = chrome_service(CHROME_DRIVER_EXECUTABLE_PATH),
                     options = options)
@@ -35,7 +43,7 @@ class Browser:
                 self.driver.install_addon(FIREFOX_RARUTOKEN_PLAGIN_PATH, temporary=True)
 
         self.wait = WebDriverWait(self.driver, self.WAITING_TIME)
-        self.__is_browser_ready()
+        #self.__is_browser_ready()
 
     # Проверка наличия плагина
     def __check_for_plugin(self) -> None:
@@ -66,5 +74,18 @@ class Browser:
     def get_element_by(self, method: str, value: str): #webdriver.remote.webelement.WebElement
         return self.wait.until(ec.visibility_of_element_located((method, value)))
 
+    def click_on_element_by(self, method: str, value: str) -> None:
+        time.sleep(0.5)
+        #self.get_element_by(method, value).click()
+        self.wait.until(ec.element_to_be_clickable((method, value))).click()
+        time.sleep(0.5)
+
     def open_page(self, url: str) -> None:
         self.driver.get(url)
+
+    def authorization(self) -> None:
+        self.open_page(AUTHORIZATION_PAGE_URL)
+        self.get_element_by(By.CSS_SELECTOR, "#pin").send_keys("12345678")
+        self.get_element_by(By.CSS_SELECTOR, ".right__bg").click()
+
+    
