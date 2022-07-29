@@ -17,10 +17,14 @@ logger.add("../logs/tests.log", format="{level} | {module} | {function} | {messa
 
 class TestKeyPair:
     list_keys = []
+    list_algorithms = []
 
-    @logger.catch
-    def test_creation(self, get_browser):
+    # @logger.catch
+    def test_creating(self, get_browser):
         logger.info(f"Тест test_creation начинает работу")
+
+        # Очищаем список ключей для проведения тестов в разных браузерах
+        self.list_keys.clear()
 
         browser = get_browser
         browser.authorization()
@@ -32,10 +36,10 @@ class TestKeyPair:
         
         # Находим все доступные алгоритмы
         element_algorithms = browser.get_element_by(By.CSS_SELECTOR, "div.form__fieldradio:nth-child(6) > div:nth-child(2)")
-        list_algorithms = element_algorithms.text.split("\n")
-        for alg in list_algorithms:
+        self.list_algorithms = element_algorithms.text.split("\n")
+        for alg in self.list_algorithms:
             if "—" in alg:
-                list_algorithms.remove(alg)
+                self.list_algorithms.remove(alg)
         logger.debug("Обнаружены алгоритмы")
 
         # Открываем домашнюю страницу
@@ -43,17 +47,18 @@ class TestKeyPair:
         logger.debug("Нажата кнопка 'К сертификатам и ключам'")
         
         # Создаём ключи
-        self.list_keys.clear()
-        for i in range(len(list_algorithms)):
-            self.list_keys.append(KeyPair(browser, f"key{i}", list_algorithms[i]))
-            logger.debug(f"Создали ключ key{i}")
+        for i in range(len(self.list_algorithms)):
+            self.list_keys.append(KeyPair(browser, f"{browser.browser_name}Key{i}", self.list_algorithms[i]))
+            logger.debug(f"Создали ключ {browser.browser_name}Key{i}")
 
         # Проверяем ключи
         for key in self.list_keys:
             if not (key.is_created):
-                logger.error(f"Поле is_created ключа {key.id} = False")
+                logger.error(f"Поле is_created ключа {browser.browser_name}Key{i} = False")
                 assert(False)
-        assert(True)
+
+        # Проверка того, что ключей было создано столько же сколько и алгоритмов
+        assert(len(self.list_keys) == len(self.list_algorithms))
 
     def test_deleting(self, get_browser):
         logger.info(f"Тест test_deleting начинает работу")
@@ -63,11 +68,10 @@ class TestKeyPair:
         for key in self.list_keys:
             key.delete(browser)
 
-        # try:
-        #     element_key_container = browser.get_element_by(By.CSS_SELECTOR, ".key__container")
-        # except TimeoutException:
-        #     assert(True)
-        # assert(False)
+        # Проверяем ключи
+        for key in self.list_keys:
+            if (key.is_created):
+                logger.error(f"Поле is_created ключа {key.id} = True")
+                assert(False)
 
-        
-        
+        assert(True)

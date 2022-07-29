@@ -31,7 +31,7 @@ class KeyPair():
         browser.click_on_element_by(By.CSS_SELECTOR, ".right__bg")
         logger.debug("Нажата кнопка 'Сгенерировать ключи'")
 
-        # Проверим создание ключа
+        # Проверим создания ключа
         try:
             element_text = browser.get_element_by(By.XPATH, "//*[contains(text(), 'Ключи созданы!')]")
             # element_text = browser.get_element_by(By.CSS_SELECTOR, ".bg__title")
@@ -40,7 +40,7 @@ class KeyPair():
                 logger.debug(f"Ключ {self.id} успешно сгенерирован")
                 self.is_created = True
         except TimeoutException:
-            logger.error(f"Ключ {self.id} не сгенерирован")
+            logger.error(f"Ключ {self.id} НЕ сгенерирован")
             pass
 
         # Открываем домашнюю страницу
@@ -52,9 +52,12 @@ class KeyPair():
 
         # Нажимаем кнопку "Прочитать хранилища устройств заново"
         browser.click_on_element_by(By.CSS_SELECTOR, ".img__reload")
+        logger.debug("Нажата кнопка 'Reload'")
         # Нажимаем кнопку корзины
         browser.click_on_element_by(By.XPATH, f"//*[contains(text(), '{self.id}')]/../../../../div[1]/div[3]/span[@class = 'img__trash']")
         logger.debug("Нажата кнопка 'Корзина'")
         # Нажимаем на кнопку "Удалить"
         browser.click_on_element_by(By.XPATH, f"//*[contains(text(), 'Удалить')]")
         logger.debug("Нажата кнопка 'Удалить'")
+
+        self.is_created = False

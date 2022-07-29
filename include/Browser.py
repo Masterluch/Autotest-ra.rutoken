@@ -21,6 +21,8 @@ class Browser:
     WAITING_TIME = 30
 
     def __init__(self, browser_name):
+        self.browser_name = browser_name
+
         # Настройка драйвера
         match browser_name:
             case "chrome":
@@ -44,6 +46,8 @@ class Browser:
 
         self.wait = WebDriverWait(self.driver, self.WAITING_TIME)
         #self.__is_browser_ready()
+
+        self.driver.switch_to.window(self.driver.window_handles[0])
 
     # Проверка наличия плагина
     def __check_for_plugin(self) -> None:
@@ -77,7 +81,9 @@ class Browser:
     def click_on_element_by(self, method: str, value: str) -> None:
         time.sleep(0.5)
         #self.get_element_by(method, value).click()
-        self.wait.until(ec.element_to_be_clickable((method, value))).click()
+        # self.wait.until(ec.element_to_be_clickable((method, value))).click()
+        element = self.get_element_by(method, value)
+        self.driver.execute_script("arguments[0].click();", element)
         time.sleep(0.5)
 
     def open_page(self, url: str) -> None:
@@ -86,6 +92,7 @@ class Browser:
     def authorization(self) -> None:
         self.open_page(AUTHORIZATION_PAGE_URL)
         self.get_element_by(By.CSS_SELECTOR, "#pin").send_keys("12345678")
-        self.get_element_by(By.CSS_SELECTOR, ".right__bg").click()
-
-    
+        logger.debug("Заполнено поле с паролем")
+        self.click_on_element_by(By.CSS_SELECTOR, ".right__bg")
+        # self.get_element_by(By.CSS_SELECTOR, ".right__bg").click()
+        logger.debug("Нажата кнопка 'Войти'")
