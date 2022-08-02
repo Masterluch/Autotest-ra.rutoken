@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.chrome.options import Options as chrome_options
 from selenium.webdriver.firefox.options import Options as firefox_options
 from selenium.webdriver.chrome.service import Service as chrome_service
@@ -9,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from settings import *
 
+from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
 import time
@@ -18,7 +20,7 @@ logger.remove()
 logger.add("../logs/tests.log", format="{level} | {module} | {function} | {message}")
 
 class Browser:
-    WAITING_TIME = 30
+    WAITING_TIME = 20
 
     def __init__(self, browser_name):
         self.browser_name = browser_name
@@ -27,15 +29,22 @@ class Browser:
         match browser_name:
             case "chrome":
                 options = chrome_options()
-                options.add_argument("--load-extension={}".format(CHROME_RARUTOKEN_PLUGIN_PATH))
+                options.add_argument(f"--load-extension={CHROME_RARUTOKEN_PLUGIN_PATH}")
                 # Для устранения ошибки [500:5256:0727/134228.966:ERROR:device_event_log_impl.cc(214)] при запуске
                 options.add_experimental_option("excludeSwitches", ["enable-logging"])
                 self.driver = webdriver.Chrome(
-                    service = chrome_service(CHROME_DRIVER_EXECUTABLE_PATH),
+                    service = chrome_service(ChromeDriverManager().install()),
                     options = options)
                 
             case "yandex":
-                pass
+                options = chrome_options()
+                options.add_argument(f"--load-extension={YANDEX_RARUTOKEN_PLUGIN_PATH}")
+                options.add_experimental_option("excludeSwitches", ["enable-logging"])
+                options.add_argument(f"--user-data-dir={YANDEX_USER_DATA_PATH}")
+                self.driver = webdriver.Chrome(
+                    service = chrome_service(YANDEX_DRIVER_EXECUTABLE_PATH),
+                    options = options)
+
             case "firefox":
                 options = firefox_options()
                 # options.add_argument("--load-extension={}".format(FIREFOX_RARUTOKEN_PLAGIN_PATH))
@@ -44,7 +53,7 @@ class Browser:
                     options = options)
                 self.driver.install_addon(FIREFOX_RARUTOKEN_PLAGIN_PATH, temporary=True)
 
-        self.wait = WebDriverWait(self.driver, self.WAITING_TIME)
+        self.__wait = WebDriverWait(self.driver, self.WAITING_TIME)
         #self.__is_browser_ready()
 
         self.driver.switch_to.window(self.driver.window_handles[0])
@@ -75,12 +84,14 @@ class Browser:
         self.__check_for_plugin()
         self.__check_for_token()
 
-    def get_element_by(self, method: str, value: str): #webdriver.remote.webelement.WebElement
-        return self.wait.until(ec.visibility_of_element_located((method, value)))
+    def get_element_by(self, method: str, value: str, is_visible: bool = True) -> WebElement:
+        if (is_visible):
+            return self.__wait.until(ec.visibility_of_element_located((method, value)))
+        return self.driver.find_element(method, value)
 
     def click_on_element_by(self, method: str, value: str) -> None:
         time.sleep(0.5)
-        #self.get_element_by(method, value).click()
+        # self.get_element_by(method, value).click()
         # self.wait.until(ec.element_to_be_clickable((method, value))).click()
         element = self.get_element_by(method, value)
         self.driver.execute_script("arguments[0].click();", element)

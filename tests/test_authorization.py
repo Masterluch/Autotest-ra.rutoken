@@ -8,6 +8,9 @@ sys.path.append("..\\include")
 from settings import *
 from Browser import Browser
 
+# sys.path.append("..")
+# from pack.Pack import *
+
 from loguru import logger
 logger.remove()
 logger.add("../logs/tests.log", format="{level} | {module} | {function} | {message}")

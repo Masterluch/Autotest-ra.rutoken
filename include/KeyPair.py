@@ -31,14 +31,14 @@ class KeyPair():
         browser.click_on_element_by(By.CSS_SELECTOR, ".right__bg")
         logger.debug("Нажата кнопка 'Сгенерировать ключи'")
 
-        # Проверим создания ключа
+        # Проверяем создания ключа
         try:
             element_text = browser.get_element_by(By.XPATH, "//*[contains(text(), 'Ключи созданы!')]")
             # element_text = browser.get_element_by(By.CSS_SELECTOR, ".bg__title")
             logger.debug("Найдена надпись 'Ключи созданы!'")
-            if (element_text.text == "Ключи созданы!"):
-                logger.debug(f"Ключ {self.id} успешно сгенерирован")
-                self.is_created = True
+            # if (element_text.text == "Ключи созданы!"):
+            logger.debug(f"Ключ {self.id} успешно сгенерирован")
+            self.is_created = True
         except TimeoutException:
             logger.error(f"Ключ {self.id} НЕ сгенерирован")
             pass
