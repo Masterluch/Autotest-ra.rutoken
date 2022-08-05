@@ -1,14 +1,17 @@
+from loguru import logger
+from CertificateRequest import CertificateRequest
 from selenium.webdriver.common.by import By
 import sys
-sys.path.append("..\\include")
-from settings import *
-from Browser import Browser
-from KeyPair import KeyPair
-from CertificateRequest import CertificateRequest
 
-from loguru import logger
+sys.path.append("..\\include")
+from KeyPair import KeyPair
+from Browser import Browser
+from settings import *
+
 logger.remove()
-logger.add("../logs/tests.log", format="{level} | {module} | {function} | {message}")
+logger.add("../logs/tests.log",
+    format="{level} | {module} | {function} | {message}")
+
 
 def test_certificate_request(get_browser, get_algorithms_list):
     logger.info(f"Тест test_creation начинает работу")
@@ -17,18 +20,20 @@ def test_certificate_request(get_browser, get_algorithms_list):
     list_algorithms = get_algorithms_list
     browser.authorization()
     logger.debug("Авторизация выполнена")
-    
+
     # Создаём запросы на сертификаты
     list_certificate_requests = []
     for i in range(len(list_algorithms)):
-        list_certificate_requests.append(CertificateRequest(browser, f"{browser.browser_name}Key{i}", list_algorithms[i]))
+        list_certificate_requests.append(CertificateRequest(
+            browser, f"{browser.browser_name}Key{i}", list_algorithms[i]))
         logger.debug(f"Создали запрос для {browser.browser_name}Key{i}")
 
     # Проверяем запросы
     for cr in list_certificate_requests:
-            if not (cr.is_created):
-                logger.error(f"Поле is_created запроса для {browser.browser_name}Key{i} = False")
-                assert(False)
+        if not (cr.is_created):
+            logger.error(
+                f"Поле is_created запроса для {browser.browser_name}Key{i} = False")
+            assert(False)
 
     # Удаляем ключи
     for cr in list_certificate_requests:

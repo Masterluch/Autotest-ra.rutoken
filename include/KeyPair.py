@@ -8,7 +8,9 @@ import time
 
 from loguru import logger
 logger.remove()
-logger.add("../logs/tests.log", format="{level} | {module} | {function} | {message}")
+logger.add("../logs/tests.log",
+           format="{level} | {module} | {function} | {message}")
+
 
 class KeyPair():
     def __init__(self, browser, id: str, algorithm: str):
@@ -16,15 +18,17 @@ class KeyPair():
         self.id = id
         logger.debug(f"Начало создания ключа {self.id}")
 
-        browser.click_on_element_by(By.XPATH, "//span[contains(text(), '{}')]".format("Создать ключ"))
+        browser.click_on_element_by(
+            By.XPATH, "//span[contains(text(), '{}')]".format("Создать ключ"))
         logger.debug("Нажата кнопка 'Создать ключ'")
-   
+
         # Заполняем поле "Идентификатор"
         browser.get_element_by(By.CSS_SELECTOR, "#id").send_keys(self.id)
         logger.debug("Заполнен идентификатор")
 
         # Выбираем алгоритм
-        browser.click_on_element_by(By.XPATH, f"//*[contains(text(), '{algorithm}')]")
+        browser.click_on_element_by(
+            By.XPATH, f"//*[contains(text(), '{algorithm}')]")
         logger.debug(f"Выбран алгоритм {algorithm}")
 
         # Нажимаем кнопку "Сгенерировать ключи"
@@ -33,15 +37,13 @@ class KeyPair():
 
         # Проверяем создания ключа
         try:
-            element_text = browser.get_element_by(By.XPATH, "//*[contains(text(), 'Ключи созданы!')]")
-            # element_text = browser.get_element_by(By.CSS_SELECTOR, ".bg__title")
+            element_text = browser.get_element_by(
+                By.XPATH, "//*[contains(text(), 'Ключи созданы!')]")
             logger.debug("Найдена надпись 'Ключи созданы!'")
-            # if (element_text.text == "Ключи созданы!"):
             logger.debug(f"Ключ {self.id} успешно сгенерирован")
             self.is_created = True
         except TimeoutException:
             logger.error(f"Ключ {self.id} НЕ сгенерирован")
-            pass
 
         # Открываем домашнюю страницу
         browser.click_on_element_by(By.CSS_SELECTOR, ".keys__back")
@@ -54,10 +56,12 @@ class KeyPair():
         browser.click_on_element_by(By.CSS_SELECTOR, ".img__reload")
         logger.debug("Нажата кнопка 'Reload'")
         # Нажимаем кнопку корзины
-        browser.click_on_element_by(By.XPATH, f"//*[contains(text(), '{self.id}')]/../../../../div[1]/div[3]/span[@class = 'img__trash']")
+        browser.click_on_element_by(
+            By.XPATH, f"//*[contains(text(), '{self.id}')]/../../../../div[1]/div[3]/span[@class = 'img__trash']")
         logger.debug("Нажата кнопка 'Корзина'")
         # Нажимаем на кнопку "Удалить"
-        browser.click_on_element_by(By.XPATH, f"//*[contains(text(), 'Удалить')]")
+        browser.click_on_element_by(
+            By.XPATH, f"//*[contains(text(), 'Удалить')]")
         logger.debug("Нажата кнопка 'Удалить'")
 
         self.is_created = False
