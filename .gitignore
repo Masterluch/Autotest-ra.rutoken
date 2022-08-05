@@ -5,5 +5,4 @@ __pycache__/
 .pytest_cache/
 experiments/
 
-settings.py
 *.log

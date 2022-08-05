@@ -54,7 +54,7 @@ class Browser:
                 self.driver.install_addon(FIREFOX_RARUTOKEN_PLAGIN_PATH, temporary=True)
 
         self.__wait = WebDriverWait(self.driver, self.WAITING_TIME)
-        #self.__is_browser_ready()
+        self.__is_browser_ready()
 
         self.driver.switch_to.window(self.driver.window_handles[0])
 
